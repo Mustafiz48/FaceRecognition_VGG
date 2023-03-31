@@ -1,9 +1,23 @@
 import pickle
 import argparse
+import cv2
+import os
+import warnings
+import sys
+
+# Following code block is to stop showing tensorflow warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+warnings.filterwarnings("ignore")
+import tensorflow as tf
+sys.path.insert(0, '..')
+tf_version = int(tf.__version__.split(".")[0])
+if tf_version == 2:
+    import logging
+    tf.get_logger().setLevel(logging.ERROR)
+
+import mtcnn
 from FaceRecognizer import FaceRecognizer
 from FaceRegister import FaceRegister
-import cv2
-import mtcnn
 
 
 def recognize(img="img_path"):

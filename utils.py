@@ -1,6 +1,5 @@
 import numpy as np
 from numpy import dot
-from numpy.linalg import norm
 
 
 def normalize_input(img):
@@ -18,7 +17,7 @@ def normalize_input(img):
 """
 
 
-def findCosineDistance(source_representation, test_representation):
+def find_cosine_distance(source_representation, test_representation):
     a = dot(source_representation, test_representation)
     b = np.sum(np.multiply(source_representation, source_representation))
     c = np.sum(np.multiply(test_representation, test_representation))
@@ -27,7 +26,7 @@ def findCosineDistance(source_representation, test_representation):
     # return dot(source_representation, test_representation) / (norm(source_representation) * norm(test_representation))
 
 
-def findEuclideanDistance(source_representation, test_representation):
+def find_euclidean_distance(source_representation, test_representation):
     if type(source_representation) == list:
         source_representation = np.array(source_representation)
 

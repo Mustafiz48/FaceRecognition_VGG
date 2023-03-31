@@ -1,12 +1,8 @@
-import pickle
-
-import cv2
-from Vgg16 import Vgg16
-from utils import normalize_input
 import os
-from retinaface import RetinaFace
-from FaceRecognizer import FaceRecognizer
+import pickle
 import mtcnn
+import cv2
+from FaceRecognizer import FaceRecognizer
 
 
 class FaceRegister:
@@ -17,8 +13,8 @@ class FaceRegister:
         detector = mtcnn.MTCNN()
         representation_list = []
         id_list = {}
+        print("\nPerforming registration with:")
         for i, person in enumerate(os.listdir(self.registration_path)):
-            print(person, i)
             for img in os.listdir(os.path.join(self.registration_path, person)):
                 if img.endswith(".jpg") or img.endswith(".JPG"):
                     img_path = os.path.join(self.registration_path, person, img)
@@ -34,14 +30,14 @@ class FaceRegister:
                             id_list[i] = str(person)
                         else:
                             raise ValueError(f"No faces found for ID: {person}! "
-                                  f"\nPlease try with different registration image")
+                                             f"\nPlease try with different registration image")
 
                     except Exception as e:
                         print(e)
                         raise ValueError("Couldn't perform registration")
                 else:
                     raise ValueError(f"The image format for ID: {person} is not supported!"
-                          f"\nPlease try with 'jpg' image ")
+                                     f"\nPlease try with 'jpg' image ")
         try:
             with open("representations.pkl", 'wb') as pkl_file:
                 pickle.dump(representation_list, pkl_file)

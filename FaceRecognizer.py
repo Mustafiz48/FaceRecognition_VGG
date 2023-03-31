@@ -1,10 +1,9 @@
 import pickle
-
-from Vgg16 import Vgg16
-import torchvision.transforms.functional as TF
 import utils
 import cv2
 import numpy as np
+from torchvision.transforms import functional
+from Vgg16 import Vgg16
 
 
 class FaceRecognizer:
@@ -12,6 +11,7 @@ class FaceRecognizer:
         self.representation_list = "representations.pkl"
         self.distance_metric = "cosine"
         self.distance_threshold = 0.25
+        self.distance = None
 
     def verify_candidate(self, target_representation):
         # representations = []
@@ -26,27 +26,24 @@ class FaceRecognizer:
 
         # calculate distance
         if self.distance_metric == 'cosine':
-            distance = utils.findCosineDistance(representations, target_representation)
-        elif self.distance_metric == 'eucledian':
-            distance = utils.findEuclideanDistance(representations, target_representation)
+            self.distance = utils.find_cosine_distance(representations, target_representation)
+        elif self.distance_metric == 'euclidean':
+            self.distance = utils.find_euclidean_distance(representations, target_representation)
         elif self.distance_metric == 'euclidean_l2':
-            distance = utils.findEuclideanDistance(utils.l2_normalize(representations),
-                                                   utils.l2_normalize(target_representation))
+            self.distance = utils.find_euclidean_distance(utils.l2_normalize(representations),
+                                                          utils.l2_normalize(target_representation))
 
-        # print(distance)
-        distance = np.squeeze(distance)
-        # print(distance)
-        min_distandance_index = np.argmin(distance, axis=-1)
-        # print(min_distandance_index)
-        return min_distandance_index
+        self.distance = np.squeeze(self.distance)
+        min_distance_index = np.argmin(self.distance, axis=-1)
+        return min_distance_index
 
     @staticmethod
     def represent(img):
         # load vgg face model
-        vgg_16 = Vgg16.get_model(weights_path="weights/vgg_face_dag.pth")
+        vgg_16 = Vgg16.get_model()
         img = cv2.resize(img, (224, 224))
         img = utils.normalize_input(img=img)
-        img = TF.to_tensor(img)
+        img = functional.to_tensor(img)
         img.unsqueeze_(0)
 
         # represent

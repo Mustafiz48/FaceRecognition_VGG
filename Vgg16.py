@@ -1,5 +1,10 @@
+import os
+import requests
 import torch
+
 from torch import nn
+from pathlib import Path
+from tqdm import tqdm
 
 
 class Vgg16(nn.Module):
@@ -90,13 +95,38 @@ class Vgg16(nn.Module):
         return x38
 
     @staticmethod
-    def get_model(weights_path='weights/vgg_face_dag.pth'):
+    def download(url: str, fname: str, chunk_size=1024):
+        resp = requests.get(url, stream=True)
+        total = int(resp.headers.get('content-length', 0))
+        try:
+            with open(fname, 'wb') as file, tqdm(
+                    desc=fname,
+                    total=total,
+                    unit='iB',
+                    unit_scale=True,
+                    unit_divisor=1024,
+            ) as bar:
+                for data in resp.iter_content(chunk_size=chunk_size):
+                    size = file.write(data)
+                    bar.update(size)
+        except Exception as e:
+            os.remove(fname)
+            print(e)
+
+    @staticmethod
+    def get_model(weights_path="weights/vgg_face_weights.pth"):
         """
         load imported model instance
 
         Args:
             weights_path (str): If set, loads model weights from the given path
         """
+        weight_file = Path(weights_path)
+        if not weight_file.is_file():
+            print("Downloading weights. Please wait, it will take time.")
+            Vgg16.download(url='https://www.robots.ox.ac.uk/~albanie/models/pytorch-mcn/vgg_face_dag.pth',
+                           fname="weights/vgg_face_weights.pth", )
+
         model = Vgg16()
         if weights_path:
             state_dict = torch.load(weights_path)
