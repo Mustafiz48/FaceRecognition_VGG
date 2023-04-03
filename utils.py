@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import dot
+from numpy.linalg import norm
 
 
 def normalize_input(img):
@@ -17,6 +18,23 @@ def normalize_input(img):
 """
 
 
+# This is the correct one, gives accurate result for same vector
+def find_cosine_similarity_modified(source_representation, test_representation):
+    # Calculate magnitude of single vector
+    test_representation_mag = np.linalg.norm(test_representation)
+
+    # Calculate magnitude of each vector in list
+    source_representation_mags = np.linalg.norm(source_representation, axis=1)
+
+    # Calculate dot product of single vector and each vector in list
+    dot_products = np.dot(source_representation, test_representation)
+
+    # Calculate cosine similarity between single vector and each vector in list
+    similarities = dot_products / (test_representation_mag * source_representation_mags)
+    return similarities
+
+
+# This one follows formula, but for some reason doesn't give accurate result when same vector is passed
 def find_cosine_distance(source_representation, test_representation):
     a = dot(source_representation, test_representation)
     b = np.sum(np.multiply(source_representation, source_representation))

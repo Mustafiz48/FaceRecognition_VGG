@@ -9,33 +9,21 @@ from Vgg16 import Vgg16
 class FaceRecognizer:
     def __init__(self):
         self.representation_list = "representations.pkl"
-        self.distance_metric = "cosine"
-        self.distance_threshold = 0.25
-        self.distance = None
+        self.similarity_metric = "cosine"
+        self.similarity_threshold = 0.8
 
-    def verify_candidate(self, target_representation):
-        # representations = []
+    @staticmethod
+    def verify_candidate(target_representation):
         with open("representations.pkl", 'rb') as f1:
-            representations = pickle.load(f1)
+            representation_list = pickle.load(f1)
+        representation_list = np.array(representation_list)
 
-        representations = np.array(representations)
+        # calculate cosine similarity
+        similarity = utils.find_cosine_similarity_modified(representation_list, target_representation)
 
-        target_representation = np.array(target_representation)
-        target_representation = np.expand_dims(target_representation, axis=0)
-        target_representation = np.transpose(target_representation)
-
-        # calculate distance
-        if self.distance_metric == 'cosine':
-            self.distance = utils.find_cosine_distance(representations, target_representation)
-        elif self.distance_metric == 'euclidean':
-            self.distance = utils.find_euclidean_distance(representations, target_representation)
-        elif self.distance_metric == 'euclidean_l2':
-            self.distance = utils.find_euclidean_distance(utils.l2_normalize(representations),
-                                                          utils.l2_normalize(target_representation))
-
-        self.distance = np.squeeze(self.distance)
-        min_distance_index = np.argmin(self.distance, axis=-1)
-        return min_distance_index
+        similarity = np.squeeze(similarity)
+        max_similarity_index = np.argmax(similarity, axis=-1)
+        return max_similarity_index
 
     @staticmethod
     def represent(img):
